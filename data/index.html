@@ -1,0 +1,60 @@
+<html>
+
+<head>
+<meta charset="UTF-8">
+
+<script>
+    var http = new XMLHttpRequest();
+    var TXpacket;
+    var textLocation = window.location.origin +"/submit.txt"
+    var chat = "welcome to the chat room"
+    http.open("GET", textLocation, true);
+    http.setRequestHeader("text", "application/x-www-form-urlencoded");
+
+
+    function initialize() {
+        //chat = "Welcome to the mesh chat room";
+        document.getElementById('display').innerHTML = chat;
+    }
+
+    function submitForm() {
+        TXpacket = document.getElementById("user_input").value;
+        http.open("GET", textLocation, true);
+        http.send(TXpacket);
+    }
+
+    http.onreadystatechange = function(){
+        console.log('changing...')
+        if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {
+            console.log('done');
+            chat = chat + "<br />" + TXpacket;
+            document.getElementById('display').innerHTML = chat;
+        }
+    }
+
+    window.onload = function () {
+        console.log('loading');
+        initialize();
+    };
+
+    //var timer = setInterval(function () {
+     //   http.send();
+    //}, 10000);
+
+</script>
+
+<title>Mesh Network Text Server</title>
+
+</head>
+
+<body>
+    <form>
+        <input type="text" name="msg" value="Hello World!" id = "user_input"><br>
+        <input type='button' value='Submit' onclick="submitForm();">
+    </form>
+
+    <label>Your input: </label>
+    <p><span id="display"></span></p>
+</body>
+
+</html>
