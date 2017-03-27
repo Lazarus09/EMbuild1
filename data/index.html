@@ -1,35 +1,43 @@
 <html>
 
 <head>
-<meta charset="UTF-8">\
+<meta charset="UTF-8">
 
 
 <script>
     var http = new XMLHttpRequest();
     var TXpacket;
-    var textLocation = window.location.origin +"/submit.js"
-    var chat = "welcome to the chat room"
+    var textLocation = window.location.origin +"/submit.js";
+    var welcome = "welcome to the chat room";
     http.open("GET", textLocation, true);
+    var logLocation = window.location.origin +"/chatLog.js";
     http.setRequestHeader("text", "application/x-www-form-urlencoded");
 
 
     function initialize() {
-        //chat = "Welcome to the mesh chat room";
-        document.getElementById('display').innerHTML = chat;
+        document.getElementById('display').innerHTML = welcome;
     }
 
     function submitForm() {
+        console.log("submitting form")
         TXpacket = document.getElementById("user_input").value;
         http.open("GET", textLocation, true);
-        http.send(TXpacket);
+        http.onreadystatechange = function(){
+            console.log('submitForm State change');
+            if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {   
+                console.log('State change done');
+                console.log(http.responseText);
+            }
+        }
+        http.send("Trying to Send Shit");
+        http.open("GET", logLocation, true);
+        http.send(TXpacket); 
     }
 
     http.onreadystatechange = function(){
         console.log('changing...')
         if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {
             console.log('done');
-            chat = chat + "<br />" + TXpacket;
-            document.getElementById('display').innerHTML = chat;
         }
     }
 
@@ -38,9 +46,23 @@
         initialize();
     };
 
-    //var timer = setInterval(function () {
-     //   http.send();
-    //}, 10000);
+    function pullLog() {
+        http.open("GET", logLocation, true);
+        http.onreadystatechange = function(){
+            console.log('state change...');
+            if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {   
+                console.log('State change done');
+                document.getElementById('display').innerHTML = http.responseText;
+            }
+        }
+        http.send();
+    }
+
+    function updateLog() {
+
+    }
+
+    var timer = setInterval(pullLog(), 100);
 
 </script>
 
@@ -51,7 +73,7 @@
 <body>
     <form>
         <input type="text" name="msg" value="Hello World!" id = "user_input"><br>
-        <input type='button' value='Submit' onclick="submitForm();">
+        <input type='button' value='Submit' onclick="submitForm()">
     </form>
 
     <label>Your input: </label>
