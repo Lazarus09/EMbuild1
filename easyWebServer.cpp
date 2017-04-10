@@ -1,4 +1,4 @@
-#include <Arduino.h>
+  #include <Arduino.h>
 #include <SimpleList.h>
 
 extern "C" {
@@ -121,10 +121,11 @@ void ICACHE_FLASH_ATTR webServerRecvCb(void *arg, char *data, unsigned short len
         webServerDebug("webServerRecvCb(): err - could not find Connection?\n");
         return;
     }
+    
     char get[5] = "GET ";
     char path[200];
     
-    webServerDebug("request=\n%s\n\n", data);
+    webServerDebug("request=%s\n\n", data);
     if ( strstr( data, get) != NULL ) {   // GET request
         char *endOfPath = strstr( data, " HTTP" );
         uint32_t pathLength = endOfPath - ( data + strlen( get ) );
@@ -144,9 +145,18 @@ void ICACHE_FLASH_ATTR webServerRecvCb(void *arg, char *data, unsigned short len
     //char ch;
     //char header[200];
     char *extension = strstr( path, ".") + 1;
-    
+    webServerDebug("\nanything at all\n");
     webServerDebug("extension=%s<--\n", extension);
-    
+    char inputBuffer[80];
+    strncpy(inputBuffer,path,10);
+    char *submitCheck = strstr(path, "chatLog.js");
+    if (submitCheck != NULL){
+        webServerDebug("found chatlog %s<--\n",submitCheck);
+        File submit = SPIFFS.open("/chatLog.js","a");
+        submit.println(inputBuffer);
+        strcpy(path, "/chatLog.js");
+    }
+
     conn->file = SPIFFS.open( path, "r" );
     if ( !conn->file ) {
         webServerDebug("webServerRecvCb(): file not found ->%s\n", path);

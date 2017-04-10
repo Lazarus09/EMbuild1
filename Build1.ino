@@ -11,6 +11,7 @@
 #include <easyMesh.h>
 #include "easyWebServer.h"
 #include <ESP8266WebServer.h>
+#include <FS.h>
 
 // some gpio pin that is connected to an LED... 
 // on my rig, this is 5, change to the right number of your LED.
@@ -29,7 +30,6 @@ String webPage = "";
 
 void setup() {
   Serial.begin(115200);
-    
   pinMode( LED, OUTPUT );
 
 //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
@@ -52,8 +52,6 @@ void setup() {
 
 void loop() {
   mesh.update();
-  // setups webServer
-
 }
 
 void yerpCb( void *arg ) {
@@ -77,6 +75,13 @@ void yerpCb( void *arg ) {
 }
 
 void receivedCallback( uint32_t from, String &msg ) {
+  File submit = SPIFFS.open("/Submit.txt", "w");
+  if (!submit) {
+      Serial.println("file open failed on mesh recived cb");
+  }
+  submit.print(msg);
+  submit.close();
+  
   Serial.printf("startHere: Received from %d msg=%s\n", from, msg.c_str());
 
 }

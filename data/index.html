@@ -9,15 +9,13 @@
     var TXpacket;
     var textLocation = window.location.origin +"/submit.js";
     var welcome = "welcome to the chat room";
-    var logLocation = window.location.origin +"/chatLog.js";
+    var logLocation = window.location.origin + "/chatLog.js";
+    var subSocket = new WebSocket("ws://192.168.205.1/");
 
 
-    function initialize() {
-        document.getElementById('display').innerHTML = welcome;
-    }
 
     function submitForm() {
-        logLocation = window.location.origin +"/chatLog.js"
+        logLocation = window.location.origin + "/" + document.getElementById("user_input").value + "chatLog.js"
         console.log("submitting form")
         TXpacket = document.getElementById("user_input").value;
         http.open("GET", logLocation, true);
@@ -36,8 +34,31 @@
         console.log('changing...')
         if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {
             console.log('done');
-        }
+            // When the connection is open, send some data to the server
+            subSocket.onopen = function () {
+                subSocket.send('Ping'); // Send the message 'Ping' to the server
+            };
+
+            // Log errors
+            subSocket.onerror = function (error) {
+                console.log('WebSocket Error ' + error);
+            };
+
+            // Log messages from the server
+            subSocket.onmessage = function (e) {
+                console.log('Server: ' + e.data);
+            };
+
+            // Sending String
+            subSocket.send('Hello Server');
+        };
+    };
+
+    function initialize() {
+        document.getElementById('display').innerHTML = welcome;
     }
+    
+    
 
     window.onload = function () {
         console.log('loading');
