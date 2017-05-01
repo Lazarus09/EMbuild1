@@ -1,6 +1,6 @@
   #include <Arduino.h>
 #include <SimpleList.h>
-
+#include <easyMesh.h>
 extern "C" {
 #include "user_interface.h"
 #include "espconn.h"
@@ -11,12 +11,19 @@ extern "C" {
 #include "FS.h"
 
 
+
 espconn webServerConn;
 esp_tcp webServerTcp;
 
 SimpleList<webServerConnectionType> connections;
 
 os_timer_t  cleanUpTimer;
+
+char * makeHTML(char *mystr, int myStrSize){
+    webServerDebug(mystr);
+    return mystr;
+}
+
 
 void webServerDebug( const char* format ... ) {
     char str[200];
@@ -38,7 +45,6 @@ void ICACHE_FLASH_ATTR webServerInit( void ) {
     webServerConn.proto.tcp->local_port = WEB_PORT;
     espconn_regist_connectcb(&webServerConn, webServerConnectCb);
     sint8 ret = espconn_accept(&webServerConn);
-    
     SPIFFS.begin(); // start file system for webserver
     
     if ( ret == 0 )
@@ -145,16 +151,29 @@ void ICACHE_FLASH_ATTR webServerRecvCb(void *arg, char *data, unsigned short len
     //char ch;
     //char header[200];
     char *extension = strstr( path, ".") + 1;
-    webServerDebug("\nanything at all\n");
     webServerDebug("extension=%s<--\n", extension);
+
     char inputBuffer[80];
-    strncpy(inputBuffer,path,10);
-    char *submitCheck = strstr(path, "chatLog.js");
+    strncpy(inputBuffer,path,strlen(path)-9);
+    strcat(inputBuffer,"</br>");
+    char *submitCheck = strstr(path, "newline.js");
     if (submitCheck != NULL){
         webServerDebug("found chatlog %s<--\n",submitCheck);
-        File submit = SPIFFS.open("/chatLog.js","a");
-        submit.println(inputBuffer);
+        File log = SPIFFS.open("/chatLog.js","a");
+        File submit = SPIFFS.open("/submit.js","w+");
+        if (submit.size() < 10) {
+            submit.println(inputBuffer);
+        }
+        else {
+            webServerDebug("is missing");
+        }
+
+        log.println(inputBuffer);
+        log.close();
         strcpy(path, "/chatLog.js");
+
+    }else{
+        webServerDebug("newline.js not found");
     }
 
     conn->file = SPIFFS.open( path, "r" );
@@ -256,8 +275,6 @@ void ICACHE_FLASH_ATTR webServerDisconCb(void *arg) {
 void ICACHE_FLASH_ATTR webServerReconCb(void *arg, sint8 err) {
 //  DEBUG_MSG("In webServer_server_recon_cb err=%d\r\n", err );
 }
-
-
 
 
 

@@ -27,7 +27,7 @@
 easyMesh  mesh;
 os_timer_t  yerpTimer;
 String webPage = "";
-
+int timer = 0;
 void setup() {
   Serial.begin(115200);
   pinMode( LED, OUTPUT );
@@ -46,7 +46,6 @@ void setup() {
   Serial.print("Connected to ");
   Serial.println(MESH_PREFIX);
 
-  
 
 }
 
@@ -75,13 +74,6 @@ void yerpCb( void *arg ) {
 }
 
 void receivedCallback( uint32_t from, String &msg ) {
-  File submit = SPIFFS.open("/Submit.txt", "w");
-  if (!submit) {
-      Serial.println("file open failed on mesh recived cb");
-  }
-  submit.print(msg);
-  submit.close();
-  
   Serial.printf("startHere: Received from %d msg=%s\n", from, msg.c_str());
 
 }

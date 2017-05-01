@@ -6,82 +6,42 @@
 
 <script>
     var http = new XMLHttpRequest();
-    var TXpacket;
-    var textLocation = window.location.origin +"/submit.js";
-    var welcome = "welcome to the chat room";
-    var logLocation = window.location.origin + "/chatLog.js";
-    var subSocket = new WebSocket("ws://192.168.205.1/");
-
-
+    var timer = setInterval(pullLog, 1000);
 
     function submitForm() {
-        logLocation = window.location.origin + "/" + document.getElementById("user_input").value + "chatLog.js"
+        interim = window.location.origin + "/" + document.getElementById("user_input").value + "newline.js"
+        submitRequest = interim.replace(" ", "_")
         console.log("submitting form")
-        TXpacket = document.getElementById("user_input").value;
-        http.open("GET", logLocation, true);
+        http.open("GET", submitRequest, true);
         http.onreadystatechange = function(){
-            console.log('submitForm State change');
+            console.log('submitForm state changing');
             if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {   
-                console.log('submitForm State change done');
-                console.log(http.responseText);
-                document.getElementById('display').innerHTML = http.responseText
+                console.log('submitForm state change done');
+                var uglyText = http.responseText;
+                var prettyText = uglyText.replace("_", " ");
+                document.getElementById('display').innerHTML = prettyText;
             }
         }
-        http.send(TXpacket); 
+        http.send(); 
     }
-
-    http.onreadystatechange = function(){
-        console.log('changing...')
-        if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {
-            console.log('done');
-            // When the connection is open, send some data to the server
-            subSocket.onopen = function () {
-                subSocket.send('Ping'); // Send the message 'Ping' to the server
-            };
-
-            // Log errors
-            subSocket.onerror = function (error) {
-                console.log('WebSocket Error ' + error);
-            };
-
-            // Log messages from the server
-            subSocket.onmessage = function (e) {
-                console.log('Server: ' + e.data);
-            };
-
-            // Sending String
-            subSocket.send('Hello Server');
-        };
-    };
-
-    function initialize() {
-        document.getElementById('display').innerHTML = welcome;
-    }
-    
-    
 
     window.onload = function () {
-        console.log('loading');
-        initialize();
+        console.log('index.html loading, retrieving log');
+        pullLog();
     };
 
     function pullLog() {
+        var logLocation = window.location.origin + "/chatLog.js";
         http.open("GET", logLocation, true);
         http.onreadystatechange = function(){
-            console.log('state change...');
             if(http.readyState == XMLHttpRequest.DONE && http.status == 200) {   
-                console.log('State change done');
-                document.getElementById('display').innerHTML = http.responseText;
+                var uglyText = http.responseText;
+                var prettyText = uglyText.replace("%20", " ");
+                document.getElementById('display').innerHTML = prettyText;
             }
         }
         http.send();
     }
-
-    function updateLog() {
-
-    }
-
-    //var timer = setInterval(pullLog(), 100);
 
 </script>
 

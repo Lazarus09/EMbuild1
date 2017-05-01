@@ -19,7 +19,7 @@ struct webServerConnectionType {
     char        buffer[BUFFER_SIZE];
     uint32_t    timeCreated;
 };
-
+char * makeHTML(char mystr, int myStrSize);
 void webServerDebug( const char* format ... );
 
 void webServerInit( void );
